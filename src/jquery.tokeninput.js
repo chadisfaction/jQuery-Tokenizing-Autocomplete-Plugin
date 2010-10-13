@@ -384,7 +384,7 @@
         
 			token_count++;
         
-			if(settings.tokenLimit != null && settings.tokenLimit >= token_count) {
+			if(settings.tokenLimit != null && settings.tokenLimit <= token_count) {
 				input_box.hide();
 				hide_dropdown();
 			}

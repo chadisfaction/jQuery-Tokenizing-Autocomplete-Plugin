@@ -372,6 +372,10 @@
 		function create_token (li_data) {
 			//input_box.val("");
 			if(!li_data){return;}
+			if (hidden_input.val().indexOf(li_data.name + ',') >= 0) {
+  			hide_dropdown();
+			  return;
+			}
 			var this_token = insert_token(li_data.id, li_data.name);
 
 			// Clear input box and make sure it keeps focus

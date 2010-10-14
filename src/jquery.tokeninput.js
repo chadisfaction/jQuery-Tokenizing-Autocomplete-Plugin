@@ -86,6 +86,9 @@
 
 		// Keep track of the timeout
 		var timeout;
+		
+		// Ajax search request
+		var xhr;
 
 		// Create a new text input an attach keyup events
 		var input_box = $("<input type=\"text\">")
@@ -436,6 +439,9 @@
 					"id": 0,
 					"name": string
 					});
+				if (xhr) {
+    		  xhr.abort();
+				}
 				add_token(this_token);
 			}
 		}
@@ -696,10 +702,13 @@
 					populate_dropdown(query, settings.jsonContainer ? results[settings.jsonContainer] : results);
 				};
             
+        if (xhr) {
+          xhr.abort();
+        }
 				if(settings.method == "POST") {
-					$.post(settings.url + queryStringDelimiter + settings.queryParam + "=" + query, settings.additionalParams, callback, settings.contentType);
+					xhr = $.post(settings.url + queryStringDelimiter + settings.queryParam + "=" + query, settings.additionalParams, callback, settings.contentType);
 				} else {
-					$.get(settings.url + queryStringDelimiter + settings.queryParam + "=" + query, settings.additionalParams, callback, settings.contentType);
+					xhr = $.get(settings.url + queryStringDelimiter + settings.queryParam + "=" + query, settings.additionalParams, callback, settings.contentType);
 				}
 			}
 		}

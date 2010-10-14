@@ -281,6 +281,7 @@
 					var this_token = $("<li><p>"+li_data[i].name+"</p> </li>")
 					.addClass(settings.classes.token)
 					.insertBefore(input_token);
+					token_count++;
 
 					$("<span>x</span>")
 					.addClass(settings.classes.tokenDelete)

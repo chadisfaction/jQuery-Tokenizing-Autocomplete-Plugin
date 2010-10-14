@@ -27,6 +27,7 @@
 			contentType: "json",
 			queryParam: "q",
 			onResult: null,
+			onDuplicate: null,
 			canCreate: false,
 			additionalParams: null,
 			isCreateOnly: false
@@ -89,6 +90,9 @@
 		
 		// Ajax search request
 		var xhr;
+		
+		// used to ignore blur event for onDuplicate callback
+		var callBlur = true;
 
 		// Create a new text input an attach keyup events
 		var input_box = $("<input type=\"text\">")
@@ -101,10 +105,12 @@
 			}
 		})
 		.blur(function () {
-			// If the user has been typing, create what they typed as a new value
-			if(settings.allowNewValues) create_new_token();
+		  if (callBlur) {
+  			// If the user has been typing, create what they typed as a new value
+  			if(settings.allowNewValues) create_new_token();
         	
-			hide_dropdown();
+  			hide_dropdown();
+		  }
 		})
 		.keydown(function (event) {
 			var previous_token;
@@ -372,10 +378,6 @@
 		function create_token (li_data) {
 			//input_box.val("");
 			if(!li_data){return;}
-			if (hidden_input.val().indexOf(li_data.name + ',') >= 0) {
-  			hide_dropdown();
-			  return;
-			}
 			var this_token = insert_token(li_data.id, li_data.name);
 
 			// Clear input box and make sure it keeps focus
@@ -446,6 +448,15 @@
 				if (xhr) {
     		  xhr.abort();
 				}
+  			if (hidden_input.val().indexOf(string + ',') >= 0) {
+  				if($.isFunction(settings.onDuplicate)) {
+  				  callBlur = false;
+  					settings.onDuplicate.call(this, string);
+  					callBlur = true;
+  				}
+          hide_dropdown();
+  			  return;
+  			}
 				add_token(this_token);
 			}
 		}

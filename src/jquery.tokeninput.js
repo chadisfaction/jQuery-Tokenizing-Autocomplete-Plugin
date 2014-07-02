@@ -27,6 +27,7 @@
 			contentType: "json",
 			queryParam: "q",
 			onResult: null,
+			onDuplicate: null,
 			canCreate: false,
 			additionalParams: null,
 			isCreateOnly: false
@@ -86,6 +87,12 @@
 
 		// Keep track of the timeout
 		var timeout;
+		
+		// Ajax search request
+		var xhr;
+		
+		// used to ignore blur event for onDuplicate callback
+		var callBlur = true;
 
 		// Create a new text input an attach keyup events
 		var input_box = $("<input type=\"text\">")
@@ -98,10 +105,12 @@
 			}
 		})
 		.blur(function () {
-			// If the user has been typing, create what they typed as a new value
-			if(settings.allowNewValues) create_new_token();
+		  if (callBlur) {
+  			// If the user has been typing, create what they typed as a new value
+  			if(settings.allowNewValues) create_new_token();
         	
-			hide_dropdown();
+  			hide_dropdown();
+		  }
 		})
 		.keydown(function (event) {
 			var previous_token;
@@ -281,6 +290,7 @@
 					var this_token = $("<li><p>"+li_data[i].name+"</p> </li>")
 					.addClass(settings.classes.token)
 					.insertBefore(input_token);
+					token_count++;
 
 					$("<span>x</span>")
 					.addClass(settings.classes.tokenDelete)
@@ -384,7 +394,7 @@
         
 			token_count++;
         
-			if(settings.tokenLimit != null && settings.tokenLimit >= token_count) {
+			if(settings.tokenLimit != null && settings.tokenLimit <= token_count) {
 				input_box.hide();
 				hide_dropdown();
 			}
@@ -435,6 +445,18 @@
 					"id": 0,
 					"name": string
 					});
+				if (xhr) {
+    		  xhr.abort();
+				}
+  			if (hidden_input.val().indexOf(string + ',') >= 0) {
+  				if($.isFunction(settings.onDuplicate)) {
+  				  callBlur = false;
+  					settings.onDuplicate.call(this, string);
+  					callBlur = true;
+  				}
+          hide_dropdown();
+  			  return;
+  			}
 				add_token(this_token);
 			}
 		}
@@ -695,10 +717,13 @@
 					populate_dropdown(query, settings.jsonContainer ? results[settings.jsonContainer] : results);
 				};
             
+        if (xhr) {
+          xhr.abort();
+        }
 				if(settings.method == "POST") {
-					$.post(settings.url + queryStringDelimiter + settings.queryParam + "=" + query, settings.additionalParams, callback, settings.contentType);
+					xhr = $.post(settings.url + queryStringDelimiter + settings.queryParam + "=" + query, settings.additionalParams, callback, settings.contentType);
 				} else {
-					$.get(settings.url + queryStringDelimiter + settings.queryParam + "=" + query, settings.additionalParams, callback, settings.contentType);
+					xhr = $.get(settings.url + queryStringDelimiter + settings.queryParam + "=" + query, settings.additionalParams, callback, settings.contentType);
 				}
 			}
 		}
